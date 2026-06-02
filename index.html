@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WP Page Monitor Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 WP Page Monitor</h1>
+            <p class="subtitle">ניטור ועדכון דפי WordPress שנוצרו באוטומציה</p>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📄</div>
+                <div class="stat-value" id="total-pages">0</div>
+                <div class="stat-label">סה"כ דפים</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-value" id="updated-pages">0</div>
+                <div class="stat-label">דפים מעודכנים</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-value" id="pending-pages">0</div>
+                <div class="stat-label">ממתינים לעדכון</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">❌</div>
+                <div class="stat-value" id="error-pages">0</div>
+                <div class="stat-label">שגיאות</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="section">
+                <h2>📋 דפים אחרונים שנסרקו</h2>
+                <div class="table-container">
+                    <table id="pages-table">
+                        <thead>
+                            <tr>
+                                <th>כותרת</th>
+                                <th>URL</th>
+                                <th>סטטוס</th>
+                                <th>תאריך סריקה</th>
+                                <th>פעולות</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pages-tbody">
+                            <tr><td colspan="5">טוען נתונים...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔄 פעילות אחרונה</h2>
+                <div id="activity-feed" class="activity-feed">
+                    <div class="activity-item">טוען פעילות...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-primary" onclick="scanAllPages()">
+                🔍 סרוק את כל הדפים
+            </button>
+            <button class="btn btn-secondary" onclick="updatePendingPages()">
+                ⬆️ עדכן דפים ממתינים
+            </button>
+            <button class="btn btn-secondary" onclick="exportReport()">
+                📊 ייצא דוח
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
