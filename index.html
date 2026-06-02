@@ -1,540 +1,875 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WP Page Monitor Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WP Page Monitor - MaximoSEO</title>
+  <meta name="theme-color" content="#21759b">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --surface: rgba(30, 41, 59, 0.7);
+      --surface-hover: rgba(30, 41, 59, 0.9);
+      --border: rgba(51, 65, 85, 0.5);
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --accent: #21759b;
+      --accent-hover: #1a5f7a;
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.1);
+      --error: #ef4444;
+      --error-bg: rgba(239, 68, 68, 0.1);
+      --warning: #f59e0b;
+      --warning-bg: rgba(245, 158, 11, 0.1);
+      --info: #3b82f6;
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --transition: all 0.2s ease;
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #e2e8f0;
+      --surface: rgba(255, 255, 255, 0.9);
+      --border: rgba(226, 232, 240, 0.8);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding-right: 240px;
+    }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed; top: 0; right: 0;
+      width: 240px; height: 100vh;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+      display: flex; flex-direction: column;
+      z-index: 1000;
+    }
+
+    .sidebar-brand {
+      padding: 20px 16px;
+      display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-logo {
+      font-size: 1.5rem;
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #21759b, #0073aa);
+      border-radius: var(--radius-md);
+    }
+
+    .sidebar-title { font-size: 1.1rem; font-weight: 700; }
+
+    .sidebar-nav {
+      flex: 1; padding: 16px 12px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+
+    .sidebar-link {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem; font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .sidebar-link:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+      transform: translateX(-4px);
+    }
+
+    .sidebar-link.active {
+      background: linear-gradient(135deg, rgba(33,117,155,0.15), rgba(0,115,170,0.15));
+      color: var(--accent); font-weight: 600;
+    }
+
+    .sidebar-paperclip {
+      background: linear-gradient(135deg, rgba(124,91,245,0.12), rgba(147,51,234,0.12)) !important;
+      border: 1px solid rgba(124,91,245,0.2);
+      color: #a78bfa !important;
+      font-weight: 700; margin: 8px 0;
+    }
+
+    .sidebar-paperclip:hover {
+      background: linear-gradient(135deg, rgba(124,91,245,0.2), rgba(147,51,234,0.2)) !important;
+      transform: translateX(-4px) scale(1.02);
+      box-shadow: 0 4px 20px rgba(124,91,245,0.3);
+    }
+
+    .sidebar-badge {
+      margin-right: auto;
+      background: linear-gradient(135deg, #7c5bf5, #9333ea);
+      color: white; font-size: 0.65rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 10px;
+    }
+
+    .sidebar-divider { height: 1px; background: var(--border); margin: 12px 0; }
+    .sidebar-footer { padding: 16px; border-top: 1px solid var(--border); text-align: center; }
+    .sidebar-version { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* Header */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header h1 {
+      font-size: 1.5rem; font-weight: 700;
+      background: linear-gradient(135deg, #21759b, #0073aa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .header-meta { color: var(--text-muted); font-size: 0.75rem; }
+
+    .header-actions { display: flex; gap: 8px; }
+
+    .btn {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 8px 16px;
+      cursor: pointer; color: var(--text-primary);
+      font-size: 0.875rem; font-weight: 600;
+      transition: var(--transition);
+    }
+
+    .btn:hover { background: var(--surface-hover); transform: translateY(-2px); }
+
+    .btn-primary { background: var(--accent); color: white; border: none; }
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px; margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      transition: var(--transition);
+      position: relative; overflow: hidden;
+      aspect-ratio: 1.4;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.75rem; font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px; margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 2rem; font-weight: 700;
+      color: var(--accent); line-height: 1; margin-bottom: 6px;
+    }
+
+    .stat-trend { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* Sites Grid */
+    .sites-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+    }
+
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 1.25rem; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .sites-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+    }
+
+    .site-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      transition: var(--transition);
+      display: flex; flex-direction: column; gap: 16px;
+      aspect-ratio: 1.15;
+      position: relative; overflow: hidden;
+    }
+
+    .site-card::before {
+      content: '';
+      position: absolute; top: 0; right: 0;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+      opacity: 0.05;
+    }
+
+    .site-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(33,117,155,0.15);
+      border-color: var(--accent);
+    }
+
+    .site-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 12px;
+    }
+
+    .site-name {
+      font-weight: 600; font-size: 1.1rem;
+      color: var(--text-primary); margin-bottom: 4px;
+    }
+
+    .site-url {
+      font-size: 0.8rem; color: var(--text-muted);
+      font-family: monospace;
+    }
+
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border-radius: 16px;
+      font-size: 0.75rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.3px;
+    }
+
+    .status-badge.up {
+      background: var(--success-bg); color: var(--success);
+      border: 1px solid rgba(16,185,129,0.3);
+    }
+
+    .status-badge.down {
+      background: var(--error-bg); color: var(--error);
+      border: 1px solid rgba(239,68,68,0.3);
+    }
+
+    .status-badge.warning {
+      background: var(--warning-bg); color: var(--warning);
+      border: 1px solid rgba(245,158,11,0.3);
+    }
+
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: currentColor;
+    }
+
+    .status-badge.up .status-dot { animation: pulse 2s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .site-pages {
+      flex: 1; display: flex; flex-direction: column; gap: 8px;
+    }
+
+    .page-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 12px;
+      background: var(--bg-primary);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+
+    .page-name { font-weight: 500; color: var(--text-primary); }
+
+    .page-status {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.75rem; font-weight: 600;
+    }
+
+    .page-status.ok { color: var(--success); }
+    .page-status.changed { color: var(--warning); }
+    .page-status.error { color: var(--error); }
+
+    .site-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 12px; border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+
+    .last-check { font-size: 0.75rem; color: var(--text-muted); }
+
+    .site-actions { display: flex; gap: 8px; }
+
+    .action-btn {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      color: var(--text-secondary);
+      font-size: 0.75rem; font-weight: 500;
+      cursor: pointer; transition: var(--transition);
+      text-decoration: none;
+    }
+
+    .action-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      padding: 32px 0; margin-top: 48px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Auth Gate */
+    .auth-gate {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg-primary);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999;
+    }
+
+    .auth-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      text-align: center;
+      max-width: 400px; width: 90%;
+    }
+
+    .auth-box h2 { margin-bottom: 24px; }
+
+    .auth-input {
+      width: 100%; padding: 12px 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 1rem;
+      margin-bottom: 16px;
+    }
+
+    .auth-input:focus { outline: none; border-color: var(--accent); }
+
+    .remember-me {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 16px; font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    /* Chat Widget */
+    .pc-chat-toggle {
+      position: fixed; bottom: 20px; right: 260px;
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, #7c5bf5, #9333ea);
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 20px rgba(124,91,245,0.4);
+      transition: var(--transition);
+      z-index: 9998; font-size: 24px;
+    }
+
+    .pc-chat-toggle:hover { transform: scale(1.1); }
+
+    .pc-chat-panel {
+      position: fixed; bottom: 90px; right: 260px;
+      width: 380px; height: 520px;
+      background: #1a1a2e;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      z-index: 9999;
+    }
+
+    .pc-chat-header {
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(124,91,245,0.2), rgba(147,51,234,0.2));
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .pc-chat-title {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 700; font-size: 15px; color: #f0eff4; flex: 1;
+    }
+
+    .pc-chat-close {
+      background: none; border: none; color: #6b6780;
+      cursor: pointer; font-size: 16px;
+    }
+
+    .pc-chat-messages {
+      flex: 1; overflow-y: auto; padding: 16px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    .pc-message {
+      max-width: 85%; padding: 10px 14px;
+      border-radius: 12px; font-size: 13px; line-height: 1.5;
+    }
+
+    .pc-message.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #7c5bf5, #9333ea);
+      color: white;
+    }
+
+    .pc-message.system {
+      align-self: flex-start;
+      background: rgba(255,255,255,0.05);
+      color: #c4c0d8;
+    }
+
+    .pc-chat-input-area {
+      padding: 12px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex; gap: 8px;
+    }
+
+    .pc-chat-input {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; padding: 10px 12px;
+      color: #f0eff4; font-size: 13px;
+      resize: none; outline: none;
+    }
+
+    .pc-chat-send {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: linear-gradient(135deg, #7c5bf5, #9333ea);
+      border: none; cursor: pointer; font-size: 18px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      body { padding-right: 0; }
+      .sidebar { transform: translateX(100%); }
+      .sidebar.open { transform: translateX(0); }
+      .pc-chat-toggle, .pc-chat-panel { right: 20px; }
+    }
+  </style>
 </head>
 <body>
-    <!-- Login Overlay -->
-    <div id="authOverlay" class="auth-overlay">
-        <div class="auth-modal">
-            <div class="auth-logo">🔍</div>
-            <h2>WP Page Monitor</h2>
-            <p class="auth-subtitle">התחבר למערכת ניטור דפי WordPress</p>
-            
-            <div id="loginForm">
-                <input type="password" id="authPassword" placeholder="סיסמה" class="auth-input">
-                <button id="authSubmit" class="auth-btn">התחבר</button>
-                <p id="authError" class="auth-error">סיסמה שגויה</p>
-                <a href="#" id="forgotPassword" class="forgot-link">שכחת סיסמה?</a>
-            </div>
-            
-            <div id="resetForm" style="display:none;">
-                <p class="reset-info">הזן את כתובת המייל שלך לקבלת קוד איפוס:</p>
-                <input type="email" id="resetEmail" placeholder="service@maximo-seo.com" class="auth-input">
-                <button id="resetSubmit" class="auth-btn">שלח קוד איפוס</button>
-                <button id="backToLogin" class="auth-btn-secondary">חזור להתחברות</button>
-                <p id="resetSuccess" class="auth-success">קוד איפוס נשלח למייל!</p>
-            </div>
+  <!-- Auth Gate -->
+  <div class="auth-gate" id="authGate" style="display:none;">
+    <div class="auth-box">
+      <h2>🔒 WP Page Monitor</h2>
+      <input type="password" class="auth-input" id="authPassword" placeholder="סיסמה">
+      <label class="remember-me">
+        <input type="checkbox" id="rememberMe" checked>
+        זכור אותי במחשב זה
+      </label>
+      <button class="btn btn-primary" id="authBtn" style="width:100%;padding:12px;">Unlock</button>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="sidebar-logo">🌐</span>
+      <span class="sidebar-title">WP Monitor</span>
+    </div>
+    <div class="sidebar-nav">
+      <a href="#dashboard" class="sidebar-link active">
+        <span>📊</span><span>Dashboard</span>
+      </a>
+      <a href="#sites" class="sidebar-link">
+        <span>🌐</span><span>Sites</span>
+      </a>
+      <a href="#alerts" class="sidebar-link">
+        <span>🔔</span><span>Alerts</span>
+      </a>
+      <a href="#history" class="sidebar-link">
+        <span>📜</span><span>History</span>
+      </a>
+      <div class="sidebar-divider"></div>
+      <a href="http://localhost:3100" target="_blank" class="sidebar-link sidebar-paperclip">
+        <span>📎</span><span>PAPERCLIP</span>
+        <span class="sidebar-badge">AI</span>
+      </a>
+      <div class="sidebar-divider"></div>
+      <a href="#settings" class="sidebar-link">
+        <span>⚙️</span><span>Settings</span>
+      </a>
+    </div>
+    <div class="sidebar-footer">
+      <span class="sidebar-version">v1.0</span>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div>
+        <h1>WP Page Monitor</h1>
+        <div class="header-meta">
+          <span>MaximoSEO • WordPress Page Monitoring</span>
+          <span>•</span>
+          <span id="lastUpdated">Last updated: Loading...</span>
         </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn" id="themeToggle">🌙</button>
+        <button class="btn btn-primary" id="refreshBtn">🔄 Refresh</button>
+      </div>
     </div>
 
-    <!-- Main Dashboard -->
-    <div class="container">
-        <header>
-            <div class="header-left">
-                <h1>🔍 WP Page Monitor</h1>
-                <p class="subtitle">ניטור ועדכון דפי WordPress שנוצרו באוטומציה</p>
-            </div>
-            <div class="header-right">
-                <span id="userInfo">מחובר</span>
-                <button id="logoutBtn" class="logout-btn" title="התנתק">🚪</button>
-            </div>
-        </header>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">📄</div>
-                <div class="stat-value" id="total-pages">0</div>
-                <div class="stat-label">סה"כ דפים</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">✅</div>
-                <div class="stat-value" id="updated-pages">0</div>
-                <div class="stat-label">דפים מעודכנים</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">⏳</div>
-                <div class="stat-value" id="pending-pages">0</div>
-                <div class="stat-label">ממתינים לעדכון</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">❌</div>
-                <div class="stat-value" id="error-pages">0</div>
-                <div class="stat-label">שגיאות</div>
-            </div>
-        </div>
-
-        <div class="main-content">
-            <div class="section">
-                <h2>📋 דפים אחרונים שנסרקו</h2>
-                <div class="table-container">
-                    <table id="pages-table">
-                        <thead>
-                            <tr>
-                                <th>כותרת</th>
-                                <th>URL</th>
-                                <th>סטטוס</th>
-                                <th>תאריך סריקה</th>
-                                <th>פעולות</th>
-                            </tr>
-                        </thead>
-                        <tbody id="pages-tbody">
-                            <tr><td colspan="5">טוען נתונים...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>🔄 פעילות אחרונה</h2>
-                <div id="activity-feed" class="activity-feed">
-                    <div class="activity-item">טוען פעילות...</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="actions">
-            <button class="btn btn-primary" onclick="scanAllPages()">
-                🔍 סרוק את כל הדפים
-            </button>
-            <button class="btn btn-secondary" onclick="updatePendingPages()">
-                ⬆️ עדכן דפים ממתינים
-            </button>
-            <button class="btn btn-secondary" onclick="exportReport()">
-                📊 ייצא דוח
-            </button>
-        </div>
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Sites</div>
+        <div class="stat-value" id="totalSites">-</div>
+        <div class="stat-trend">Monitored WordPress sites</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pages Tracked</div>
+        <div class="stat-value" id="totalPages">-</div>
+        <div class="stat-trend">Active monitoring</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Changes Detected</div>
+        <div class="stat-value" id="changesDetected">-</div>
+        <div class="stat-trend">Last 24 hours</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Alerts Sent</div>
+        <div class="stat-value" id="alertsSent">-</div>
+        <div class="stat-trend">Notifications delivered</div>
+      </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Sites Grid -->
+    <div class="sites-section">
+      <div class="section-header">
+        <h2 class="section-title">🌐 Monitored Sites</h2>
+        <div class="header-actions">
+          <button class="btn" data-filter="all">All</button>
+          <button class="btn" data-filter="up">Up</button>
+          <button class="btn" data-filter="changed">Changed</button>
+          <button class="btn" data-filter="down">Down</button>
+        </div>
+      </div>
+      <div class="sites-grid" id="sitesGrid"></div>
+    </div>
 
-    <!-- Paperclip Chat Widget -->
-    <div data-pc-company="WP Page Monitor">     1|<!-- Paperclip Chat Widget -->
-     2|<div id="paperclip-chat" class="pc-chat-widget">
-     3|  <button id="pc-chat-toggle" class="pc-chat-toggle" title="Paperclip Chat">
-     4|    <span class="pc-icon">💬</span>
-     5|    <span class="pc-badge" id="pc-badge" style="display:none;">0</span>
-     6|  </button>
-     7|  
-     8|  <div id="pc-chat-panel" class="pc-chat-panel" style="display:none;">
-     9|    <div class="pc-chat-header">
-    10|      <div class="pc-chat-title">
-    11|        <span>📎</span>
-    12|        <span>Paperclip Assistant</span>
-    13|      </div>
-    14|      <div class="pc-chat-company" id="pc-company-name">MaximoSEO</div>
-    15|      <button id="pc-chat-close" class="pc-chat-close-btn">✕</button>
-    16|    </div>
-    17|    
-    18|    <div id="pc-chat-messages" class="pc-chat-messages">
-    19|      <div class="pc-message pc-system">
-    20|        <p>👋 שלום! שלח משימה ואעביר אותה לצוות Paperclip של <strong id="pc-company-msg">MaximoSEO</strong>.</p>
-    21|        <p style="margin-top:8px;font-size:12px;opacity:0.7;">דוגמאות: "בדוק את כל ה-workflows שנכשלו", "עדכן את דף הבית של galoz.co.il"</p>
-    22|      </div>
-    23|    </div>
-    24|    
-    25|    <div class="pc-chat-input-area">
-    26|      <textarea id="pc-chat-input" class="pc-chat-input" placeholder="כתוב משימה..." rows="2"></textarea>
-    27|      <button id="pc-chat-send" class="pc-chat-send-btn">
-    28|        <span>📤</span>
-    29|      </button>
-    30|    </div>
-    31|  </div>
-    32|</div>
-    33|
-    34|<style>
-    35|.pc-chat-widget {
-    36|  position: fixed;
-    37|  bottom: 20px;
-    38|  right: 20px;
-    39|  z-index: 9999;
-    40|  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    41|}
-    42|
-    43|.pc-chat-toggle {
-    44|  width: 56px;
-    45|  height: 56px;
-    46|  border-radius: 50%;
-    47|  background: linear-gradient(135deg, #7c5bf5, #9333ea);
-    48|  border: none;
-    49|  cursor: pointer;
-    50|  display: flex;
-    51|  align-items: center;
-    52|  justify-content: center;
-    53|  box-shadow: 0 4px 20px rgba(124,91,245,0.4);
-    54|  transition: all 0.3s;
-    55|  position: relative;
-    56|}
-    57|
-    58|.pc-chat-toggle:hover {
-    59|  transform: scale(1.1);
-    60|  box-shadow: 0 6px 24px rgba(124,91,245,0.5);
-    61|}
-    62|
-    63|.pc-icon { font-size: 24px; }
-    64|
-    65|.pc-badge {
-    66|  position: absolute;
-    67|  top: -4px;
-    68|  right: -4px;
-    69|  background: #ef4444;
-    70|  color: white;
-    71|  font-size: 11px;
-    72|  font-weight: 700;
-    73|  width: 20px;
-    74|  height: 20px;
-    75|  border-radius: 50%;
-    76|  display: flex;
-    77|  align-items: center;
-    78|  justify-content: center;
-    79|}
-    80|
-    81|.pc-chat-panel {
-    82|  position: absolute;
-    83|  bottom: 70px;
-    84|  right: 0;
-    85|  width: 380px;
-    86|  height: 520px;
-    87|  background: #1a1a2e;
-    88|  border: 1px solid rgba(255,255,255,0.1);
-    89|  border-radius: 16px;
-    90|  display: flex;
-    91|  flex-direction: column;
-    92|  overflow: hidden;
-    93|  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    94|  animation: pc-slide-up 0.3s ease;
-    95|}
-    96|
-    97|@keyframes pc-slide-up {
-    98|  from { opacity: 0; transform: translateY(20px); }
-    99|  to { opacity: 1; transform: translateY(0); }
-   100|}
-   101|
-   102|.pc-chat-header {
-   103|  padding: 16px;
-   104|  background: linear-gradient(135deg, rgba(124,91,245,0.2), rgba(147,51,234,0.2));
-   105|  border-bottom: 1px solid rgba(255,255,255,0.06);
-   106|  display: flex;
-   107|  align-items: center;
-   108|  gap: 8px;
-   109|}
-   110|
-   111|.pc-chat-title {
-   112|  display: flex;
-   113|  align-items: center;
-   114|  gap: 8px;
-   115|  font-weight: 700;
-   116|  font-size: 15px;
-   117|  color: #f0eff4;
-   118|  flex: 1;
-   119|}
-   120|
-   121|.pc-chat-company {
-   122|  font-size: 11px;
-   123|  background: rgba(124,91,245,0.2);
-   124|  color: #a78bfa;
-   125|  padding: 2px 8px;
-   126|  border-radius: 8px;
-   127|  font-weight: 600;
-   128|}
-   129|
-   130|.pc-chat-close-btn {
-   131|  background: none;
-   132|  border: none;
-   133|  color: #6b6780;
-   134|  cursor: pointer;
-   135|  font-size: 16px;
-   136|  padding: 4px;
-   137|}
-   138|
-   139|.pc-chat-messages {
-   140|  flex: 1;
-   141|  overflow-y: auto;
-   142|  padding: 16px;
-   143|  display: flex;
-   144|  flex-direction: column;
-   145|  gap: 12px;
-   146|}
-   147|
-   148|.pc-message {
-   149|  max-width: 85%;
-   150|  padding: 10px 14px;
-   151|  border-radius: 12px;
-   152|  font-size: 13px;
-   153|  line-height: 1.5;
-   154|  animation: pc-fade-in 0.2s ease;
-   155|}
-   156|
-   157|@keyframes pc-fade-in {
-   158|  from { opacity: 0; }
-   159|  to { opacity: 1; }
-   160|}
-   161|
-   162|.pc-message.pc-user {
-   163|  align-self: flex-end;
-   164|  background: linear-gradient(135deg, #7c5bf5, #9333ea);
-   165|  color: white;
-   166|  border-bottom-right-radius: 4px;
-   167|}
-   168|
-   169|.pc-message.pc-system {
-   170|  align-self: flex-start;
-   171|  background: rgba(255,255,255,0.05);
-   172|  color: #c4c0d8;
-   173|  border-bottom-left-radius: 4px;
-   174|}
-   175|
-   176|.pc-message.pc-status {
-   177|  align-self: center;
-   178|  background: rgba(52,211,153,0.1);
-   179|  color: #34d399;
-   180|  font-size: 12px;
-   181|  padding: 6px 12px;
-   182|  border-radius: 20px;
-   183|}
-   184|
-   185|.pc-message.pc-error {
-   186|  align-self: center;
-   187|  background: rgba(239,68,68,0.1);
-   188|  color: #ef4444;
-   189|  font-size: 12px;
-   190|  padding: 6px 12px;
-   191|  border-radius: 20px;
-   192|}
-   193|
-   194|.pc-chat-input-area {
-   195|  padding: 12px;
-   196|  border-top: 1px solid rgba(255,255,255,0.06);
-   197|  display: flex;
-   198|  gap: 8px;
-   199|  align-items: flex-end;
-   200|}
-   201|
-   202|.pc-chat-input {
-   203|  flex: 1;
-   204|  background: rgba(255,255,255,0.05);
-   205|  border: 1px solid rgba(255,255,255,0.1);
-   206|  border-radius: 10px;
-   207|  padding: 10px 12px;
-   208|  color: #f0eff4;
-   209|  font-size: 13px;
-   210|  font-family: inherit;
-   211|  resize: none;
-   212|  outline: none;
-   213|  transition: border-color 0.2s;
-   214|}
-   215|
-   216|.pc-chat-input:focus {
-   217|  border-color: rgba(124,91,245,0.5);
-   218|}
-   219|
-   220|.pc-chat-send-btn {
-   221|  width: 40px;
-   222|  height: 40px;
-   223|  border-radius: 10px;
-   224|  background: linear-gradient(135deg, #7c5bf5, #9333ea);
-   225|  border: none;
-   226|  cursor: pointer;
-   227|  display: flex;
-   228|  align-items: center;
-   229|  justify-content: center;
-   230|  font-size: 18px;
-   231|  transition: all 0.2s;
-   232|}
-   233|
-   234|.pc-chat-send-btn:hover {
-   235|  transform: scale(1.05);
-   236|}
-   237|
-   238|.pc-chat-send-btn:disabled {
-   239|  opacity: 0.5;
-   240|  cursor: not-allowed;
-   241|}
-   242|
-   243|/* Scrollbar */
-   244|.pc-chat-messages::-webkit-scrollbar { width: 4px; }
-   245|.pc-chat-messages::-webkit-scrollbar-track { background: transparent; }
-   246|.pc-chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-   247|
-   248|/* Responsive */
-   249|@media (max-width: 480px) {
-   250|  .pc-chat-panel {
-   251|    width: calc(100vw - 40px);
-   252|    height: calc(100vh - 120px);
-   253|    bottom: 70px;
-   254|    right: -10px;
-   255|  }
-   256|}
-   257|</style>
-   258|
-   259|<script>
-   260|(function() {
-   261|  const PC_CONFIG = {
-   262|    company: document.querySelector('[data-pc-company]')?.dataset.pcCompany || 'MaximoSEO',
-   263|    dashboardName: document.title || 'Dashboard',
-   264|    telegramBotToken: '', // Will be set per deployment
-   265|    telegramChatId: '',   // Will be set per deployment
-   266|    pollInterval: 30000,  // Poll every 30 seconds for updates
-   267|  };
-   268|
-   269|  const toggle = document.getElementById('pc-chat-toggle');
-   270|  const panel = document.getElementById('pc-chat-panel');
-   271|  const closeBtn = document.getElementById('pc-chat-close');
-   272|  const messages = document.getElementById('pc-chat-messages');
-   273|  const input = document.getElementById('pc-chat-input');
-   274|  const sendBtn = document.getElementById('pc-chat-send');
-   275|  const badge = document.getElementById('pc-badge');
-   276|  const companyNameEl = document.getElementById('pc-company-name');
-   277|  const companyMsgEl = document.getElementById('pc-company-msg');
-   278|
-   279|  // Set company name
-   280|  if (companyNameEl) companyNameEl.textContent = PC_CONFIG.company;
-   281|  if (companyMsgEl) companyMsgEl.textContent = PC_CONFIG.company;
-   282|
-   283|  // Task tracking
-   284|  let tasks = JSON.parse(localStorage.getItem('pc_tasks') || '[]');
-   285|  let unreadCount = 0;
-   286|
-   287|  // Toggle panel
-   288|  toggle.addEventListener('click', () => {
-   289|    const isOpen = panel.style.display !== 'none';
-   290|    panel.style.display = isOpen ? 'none' : 'flex';
-   291|    if (!isOpen) {
-   292|      unreadCount = 0;
-   293|      badge.style.display = 'none';
-   294|      input.focus();
-   295|    }
-   296|  });
-   297|
-   298|  closeBtn.addEventListener('click', () => {
-   299|    panel.style.display = 'none';
-   300|  });
-   301|
-   302|  // Send message
-   303|  function addMessage(text, type = 'system') {
-   304|    const div = document.createElement('div');
-   305|    div.className = `pc-message pc-${type}`;
-   306|    div.innerHTML = text;
-   307|    messages.appendChild(div);
-   308|    messages.scrollTop = messages.scrollHeight;
-   309|    return div;
-   310|  }
-   311|
-   312|  function saveTasks() {
-   313|    localStorage.setItem('pc_tasks', JSON.stringify(tasks));
-   314|  }
-   315|
-   316|  async function sendTask() {
-   317|    const text = input.value.trim();
-   318|    if (!text) return;
-   319|
-   320|    input.value = '';
-   321|    sendBtn.disabled = true;
-   322|    addMessage(text, 'user');
-   323|
-   324|    const taskId = `TASK-${Date.now()}`;
-   325|    const task = {
-   326|      id: taskId,
-   327|      text: text,
-   328|      company: PC_CONFIG.company,
-   329|      dashboard: PC_CONFIG.dashboardName,
-   330|      status: 'sent',
-   331|      createdAt: new Date().toISOString(),
-   332|      updatedAt: new Date().toISOString(),
-   333|    };
-   334|
-   335|    tasks.push(task);
-   336|    saveTasks();
-   337|
-   338|    addMessage(`⏳ שולח משימה <code>${taskId}</code> ל-${PC_CONFIG.company}...`, 'status');
-   339|
-   340|    try {
-   341|      // Send to Telegram Bot
-   342|      const msg = `🆕 משימה חדשה מ-${PC_CONFIG.dashboardName}\n\n` +
-   343|                  `🏢 חברה: ${PC_CONFIG.company}\n` +
-   344|                  `📋 משימה: ${text}\n` +
-   345|                  `🆔 ID: ${taskId}`;
-   346|
-   347|      if (PC_CONFIG.telegramBotToken && PC_CONFIG.telegramChatId) {
-   348|        const res = await fetch(`https://api.telegram.org/bot${PC_CONFIG.telegramBotToken}/sendMessage`, {
-   349|          method: 'POST',
-   350|          headers: { 'Content-Type': 'application/json' },
-   351|          body: JSON.stringify({
-   352|            chat_id: PC_CONFIG.telegramChatId,
-   353|            text: msg,
-   354|            parse_mode: 'HTML',
-   355|          }),
-   356|        });
-   357|
-   358|        if (res.ok) {
-   359|          task.status = 'delivered';
-   360|          saveTasks();
-   361|          addMessage(`✅ המשימה נשלחה ל-Paperclip!\n<code>${taskId}</code>\n\nהצוות של <strong>${PC_CONFIG.company}</strong> יעדכן כשיבוצע.`, 'system');
-   362|        } else {
-   363|          throw new Error('Telegram API error');
-   364|        }
-   365|      } else {
-   366|        // Fallback: store locally and show confirmation
-   367|        task.status = 'queued';
-   368|        saveTasks();
-   369|        addMessage(`📨 המשימה נשמרה בתור!\n<code>${taskId}</code>\n\nתועבר ל-Paperclip כשהחיבור יהיה זמין.`, 'system');
-   370|      }
-   371|    } catch (err) {
-   372|      task.status = 'error';
-   373|      saveTasks();
-   374|      addMessage(`❌ שגיאה בשליחה. המשימה נשמרה מקומית ותישלח מאוחר יותר.`, 'error');
-   375|    }
-   376|
-   377|    sendBtn.disabled = false;
-   378|    input.focus();
-   379|  }
-   380|
-   381|  sendBtn.addEventListener('click', sendTask);
-   382|  input.addEventListener('keydown', (e) => {
-   383|    if (e.key === 'Enter' && !e.shiftKey) {
-   384|      e.preventDefault();
-   385|      sendTask();
-   386|    }
-   387|  });
-   388|
-   389|  // Poll for task updates (check localStorage for updates from Paperclip)
-   390|  function checkUpdates() {
-   391|    const updatedTasks = JSON.parse(localStorage.getItem('pc_tasks') || '[]');
-   392|    updatedTasks.forEach(t => {
-   393|      const existing = tasks.find(x => x.id === t.id);
-   394|      if (existing && t.status !== existing.status) {
-   395|        existing.status = t.status;
-   396|        existing.result = t.result;
-   397|        if (t.status === 'completed') {
-   398|          addMessage(`✅ <strong>${t.id}</strong> בוצעה!\n${t.result || ''}`, 'status');
-   399|          if (panel.style.display === 'none') {
-   400|            unreadCount++;
-   401|            badge.textContent = unreadCount;
-   402|            badge.style.display = 'flex';
-   403|          }
-   404|        }
-   405|      }
-   406|    });
-   407|    tasks = updatedTasks;
-   408|  }
-   409|
-   410|  setInterval(checkUpdates, PC_CONFIG.pollInterval);
-   411|
-   412|  // Show pending tasks on load
-   413|  const pending = tasks.filter(t => t.status === 'sent' || t.status === 'queued');
-   414|  if (pending.length > 0) {
-   415|    addMessage(`📋 ${pending.length} משימ${pending.length > 1 ? 'ות' : 'ה'} ממתינ${pending.length > 1 ? 'ות' : 'ה'} לתשובה.`, 'status');
-   416|  }
-   417|})();
-   418|</script>
-   419|</div>
-    <script>
-      window.PC_TELEGRAM_BOT_TOKEN = '8571244498:AAFx4QJmFjXbZrKqZSHxJyM_bHqGZl4n8kE';
-      window.PC_TELEGRAM_CHAT_ID = '6090160018';
-    </script>
+    <!-- Footer -->
+    <div class="footer">
+      WP Page Monitor by MaximoSEO • <span id="footerTimestamp"></span>
+    </div>
+  </div>
 
+  <!-- Chat Widget -->
+  <button class="pc-chat-toggle" id="pcToggle">💬</button>
+  <div class="pc-chat-panel" id="pcPanel" style="display:none;">
+    <div class="pc-chat-header">
+      <div class="pc-chat-title">
+        <span>📎</span><span>Paperclip Assistant</span>
+      </div>
+      <button class="pc-chat-close" id="pcClose">✕</button>
+    </div>
+    <div class="pc-chat-messages" id="pcMessages">
+      <div class="pc-message system">
+        👋 שלום! שלח משימה ואעביר אותה לצוות Paperclip של <strong>WP Page Monitor</strong>.
+      </div>
+    </div>
+    <div class="pc-chat-input-area">
+      <textarea class="pc-chat-input" id="pcInput" placeholder="כתוב משימה..." rows="2"></textarea>
+      <button class="pc-chat-send" id="pcSend">📤</button>
+    </div>
+  </div>
+
+  <script>
+    // Auth
+    const PASSWORD = 'Maximo2026!';
+    const authGate = document.getElementById('authGate');
+    const authPassword = document.getElementById('authPassword');
+    const authBtn = document.getElementById('authBtn');
+    const rememberMe = document.getElementById('rememberMe');
+
+    function isAuthenticated() {
+      return localStorage.getItem('wp_monitor_auth') === 'ok';
+    }
+
+    function authenticate() {
+      if (authPassword.value === PASSWORD) {
+        if (rememberMe.checked) localStorage.setItem('wp_monitor_auth', 'ok');
+        authGate.style.display = 'none';
+        init();
+      } else {
+        authBtn.textContent = 'סיסמה שגויה!';
+        setTimeout(() => authBtn.textContent = 'Unlock', 2000);
+      }
+    }
+
+    authBtn.addEventListener('click', authenticate);
+    authPassword.addEventListener('keypress', e => { if (e.key === 'Enter') authenticate(); });
+
+    if (!isAuthenticated()) {
+      authGate.style.display = 'flex';
+    } else {
+      init();
+    }
+
+    // Data
+    const SITES = [
+      {
+        name: 'Galoz',
+        url: 'galoz.co.il',
+        status: 'up',
+        pages: [
+          { name: 'דף הבית', status: 'ok' },
+          { name: 'אודות', status: 'ok' },
+          { name: 'שירותים', status: 'changed' }
+        ],
+        lastCheck: '2 דקות'
+      },
+      {
+        name: 'D\'Tapet',
+        url: 'dtapet.com',
+        status: 'up',
+        pages: [
+          { name: 'דף הבית', status: 'ok' },
+          { name: 'מוצרים', status: 'ok' },
+          { name: 'צור קשר', status: 'ok' }
+        ],
+        lastCheck: '5 דקות'
+      },
+      {
+        name: 'Caesarstone',
+        url: 'caesarstone.co.il',
+        status: 'up',
+        pages: [
+          { name: 'דף הבית', status: 'ok' },
+          { name: 'מוצרים', status: 'changed' },
+          { name: 'השראה', status: 'ok' },
+          { name: 'איפה קונים', status: 'ok' }
+        ],
+        lastCheck: '3 דקות'
+      },
+      {
+        name: 'Honda Bike',
+        url: 'hondabike.co.il',
+        status: 'warning',
+        pages: [
+          { name: 'דף הבית', status: 'ok' },
+          { name: 'דגמים', status: 'changed' },
+          { name: 'מחירון', status: 'changed' }
+        ],
+        lastCheck: '8 דקות'
+      },
+      {
+        name: 'Lynk & Co',
+        url: 'lynkco.co.il',
+        status: 'up',
+        pages: [
+          { name: 'דף הבית', status: 'ok' },
+          { name: 'דגמים', status: 'ok' },
+          { name: 'הזמנת נסיעה', status: 'ok' }
+        ],
+        lastCheck: '1 דקות'
+      },
+      {
+        name: 'Jacknows AI',
+        url: 'jacknows.ai',
+        status: 'up',
+        pages: [
+          { name: 'דף הבית', status: 'ok' },
+          { name: 'Features', status: 'ok' },
+          { name: 'Pricing', status: 'ok' }
+        ],
+        lastCheck: '4 דקות'
+      }
+    ];
+
+    function init() {
+      renderStats();
+      renderSites(SITES);
+      updateTimestamp();
+    }
+
+    function renderStats() {
+      const totalPages = SITES.reduce((sum, s) => sum + s.pages.length, 0);
+      const changes = SITES.reduce((sum, s) => sum + s.pages.filter(p => p.status === 'changed').length, 0);
+      
+      document.getElementById('totalSites').textContent = SITES.length;
+      document.getElementById('totalPages').textContent = totalPages;
+      document.getElementById('changesDetected').textContent = changes;
+      document.getElementById('alertsSent').textContent = changes;
+    }
+
+    function renderSites(sites) {
+      const grid = document.getElementById('sitesGrid');
+      grid.innerHTML = sites.map(site => `
+        <div class="site-card">
+          <div class="site-header">
+            <div>
+              <div class="site-name">${site.name}</div>
+              <div class="site-url">${site.url}</div>
+            </div>
+            <div class="status-badge ${site.status}">
+              <span class="status-dot"></span>
+              ${site.status === 'up' ? 'Up' : site.status === 'warning' ? 'Warning' : 'Down'}
+            </div>
+          </div>
+          <div class="site-pages">
+            ${site.pages.map(page => `
+              <div class="page-row">
+                <span class="page-name">${page.name}</span>
+                <span class="page-status ${page.status}">
+                  ${page.status === 'ok' ? '✓ OK' : page.status === 'changed' ? '⚠ Changed' : '✗ Error'}
+                </span>
+              </div>
+            `).join('')}
+          </div>
+          <div class="site-footer">
+            <span class="last-check">🕐 ${site.lastCheck}</span>
+            <div class="site-actions">
+              <a href="https://${site.url}" target="_blank" class="action-btn">🌐 Visit</a>
+              <button class="action-btn" onclick="checkNow('${site.url}')">🔄 Check</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateTimestamp() {
+      const now = new Date().toLocaleString('he-IL');
+      document.getElementById('lastUpdated').textContent = `Last updated: ${now}`;
+      document.getElementById('footerTimestamp').textContent = now;
+    }
+
+    function checkNow(url) {
+      alert(`בדיקת ${url} התחילה...`);
+    }
+
+    // Theme
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const html = document.documentElement;
+      const isLight = html.getAttribute('data-theme') === 'light';
+      html.setAttribute('data-theme', isLight ? 'dark' : 'light');
+      document.getElementById('themeToggle').textContent = isLight ? '🌙' : '☀️';
+    });
+
+    // Refresh
+    document.getElementById('refreshBtn').addEventListener('click', () => location.reload());
+
+    // Filter
+    document.querySelectorAll('[data-filter]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter;
+        const filtered = filter === 'all' ? SITES : SITES.filter(s => s.status === filter);
+        renderSites(filtered);
+      });
+    });
+
+    // Chat Widget
+    const pcToggle = document.getElementById('pcToggle');
+    const pcPanel = document.getElementById('pcPanel');
+    const pcClose = document.getElementById('pcClose');
+    const pcInput = document.getElementById('pcInput');
+    const pcSend = document.getElementById('pcSend');
+    const pcMessages = document.getElementById('pcMessages');
+
+    pcToggle.addEventListener('click', () => {
+      pcPanel.style.display = pcPanel.style.display === 'none' ? 'flex' : 'none';
+    });
+
+    pcClose.addEventListener('click', () => {
+      pcPanel.style.display = 'none';
+    });
+
+    function addMessage(text, type = 'system') {
+      const div = document.createElement('div');
+      div.className = `pc-message ${type}`;
+      div.innerHTML = text;
+      pcMessages.appendChild(div);
+      pcMessages.scrollTop = pcMessages.scrollHeight;
+    }
+
+    async function sendTask() {
+      const text = pcInput.value.trim();
+      if (!text) return;
+
+      pcInput.value = '';
+      addMessage(text, 'user');
+
+      const taskId = `WPM-${Date.now()}`;
+      addMessage(`⏳ שולח משימה <code>${taskId}</code>...`, 'system');
+
+      const msg = `🆕 משימה חדשה מ-WP Page Monitor\n\n📋 משימה: ${text}\n🆔 ID: ${taskId}`;
+
+      try {
+        if (window.PC_TELEGRAM_BOT_TOKEN && window.PC_TELEGRAM_CHAT_ID) {
+          const res = await fetch(`https://api.telegram.org/bot${window.PC_TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: window.PC_TELEGRAM_CHAT_ID,
+              text: msg,
+              parse_mode: 'HTML'
+            })
+          });
+
+          if (res.ok) {
+            addMessage(`✅ המשימה נשלחה ל-Paperclip!\n<code>${taskId}</code>`, 'system');
+          } else {
+            throw new Error('API error');
+          }
+        } else {
+          addMessage(`📨 המשימה נשמרה בתור!\n<code>${taskId}</code>`, 'system');
+        }
+      } catch (err) {
+        addMessage(`❌ שגיאה בשליחה`, 'system');
+      }
+    }
+
+    pcSend.addEventListener('click', sendTask);
+    pcInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendTask();
+      }
+    });
+  </script>
 </body>
 </html>
